@@ -159,6 +159,7 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 	return (
 		<div
 			role="status"
+			aria-label="Typing indicator"
 			className={cn('not-prose flex items-end gap-2', className)}
 			{...props}
 		>
@@ -182,15 +183,15 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 			)}
 
 			<div className="flex w-full flex-col items-start gap-1">
-				<div className="not-prose w-fit max-w-[80%] rounded-lg bg-card-muted px-3 py-2 text-sm text-foreground transition-all duration-200 ease-in-out">
+				<div className="not-prose w-fit max-w-[80%] rounded-lg bg-card-muted px-3 py-2 text-sm text-foreground transition-all duration-200 ease-in-out shadow-sm">
 					<div className="flex items-center gap-2">
-						<span className="text-xs text-foreground/70">
+						<span className="text-xs text-foreground/70 italic">
 							{getTypingText()}
 						</span>
-						<div className="flex gap-1">
-							<div className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/60 [animation-delay:-0.3s]" />
-							<div className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/60 [animation-delay:-0.15s]" />
-							<div className="h-1.5 w-1.5 animate-bounce rounded-full bg-foreground/60" />
+						<div className="flex gap-1 ml-2">
+							<div className="h-2 w-2 animate-pulse rounded-full bg-foreground/60 [animation-delay:-0.4s]" />
+							<div className="h-2 w-2 animate-pulse rounded-full bg-foreground/60 [animation-delay:-0.2s]" />
+							<div className="h-2 w-2 animate-pulse rounded-full bg-foreground/60" />
 						</div>
 					</div>
 				</div>
