@@ -1,17 +1,20 @@
 import { ContentaChat } from '@/components/assistant-chat'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
-import { sendMessage } from '@/lib/contenta-sdk';
+import ContentaLogo from '@/assets/contenta.svg';
 
-function App() {
+interface AppProps {
+	sendMessage: (message: string, agentId: string) => AsyncIterable<string>;
+}
+
+function App({ sendMessage }: AppProps) {
 	const agentId = import.meta.env.VITE_CONTENTA_ASSISTANT_ID || '';
 
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="icon" >
-					<MessageCircle className="h-6 w-6" />
+				<Button variant="icon" size="lg">
+					<img src={ContentaLogo} alt="Contenta" className="h-12 w-12" />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className='p-0'>

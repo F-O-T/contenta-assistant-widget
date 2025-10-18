@@ -466,11 +466,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 					/>
 				</button>
 			</form>
-			{maxLength && (
-				<div className="mt-1 text-right text-xs text-foreground/45 dark:text-foreground/45">
-					{message.length}/{maxLength}
+			<div className="mt-2 flex items-center justify-between">
+				{maxLength && (
+					<div className="text-xs text-foreground/45 dark:text-foreground/45">
+						{message.length}/{maxLength}
+					</div>
+				)}
+				<div className="text-xs text-foreground/45">
+					Powered by{' '}
+					<a
+						href="https://contentagen.com/"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-foreground/60 hover:text-foreground/80 underline transition-colors"
+					>
+						ContentaGen
+					</a>
 				</div>
-			)}
+			</div>
 		</div>
 	);
 };

@@ -1,8 +1,8 @@
 import { ContentaChat } from '@/components/assistant-chat'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
 import type { ContentaChatProps } from '@/components/assistant-chat';
+import ContentaLogo from '@/assets/contenta.svg';
 
 
 export const ContentaWidget: React.FC<ContentaChatProps> = ({
@@ -19,8 +19,8 @@ export const ContentaWidget: React.FC<ContentaChatProps> = ({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="icon" >
-          <MessageCircle className="h-6 w-6" />
+        <Button variant="icon" size="lg">
+          <img src={ContentaLogo} alt="Contenta" className="h-12 w-12" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className='p-0'>
