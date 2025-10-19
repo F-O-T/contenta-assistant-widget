@@ -1,4 +1,4 @@
-import * as RadixIcons from '@radix-ui/react-icons';
+import * as RadixIcons from "@radix-ui/react-icons";
 
 export const Icons = {
 	ChevronDown: RadixIcons.ChevronDownIcon,
