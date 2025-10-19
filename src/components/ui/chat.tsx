@@ -470,8 +470,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 				<div className="flex mt-1 justify-between items-center text-xs text-foreground/45 dark:text-foreground/45">
 					<span className="gap-1 flex">
 						Powered by
-						<a className="underline" href="https://contentagen.com">
-							Contenta
+						<a
+							href="https://contentagen.com/"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-foreground/60 hover:text-foreground/80 underline transition-colors"
+						>
+							ContentaGen
 						</a>
 					</span>
 					<div>
@@ -497,4 +502,3 @@ export const ChatActions: React.FC<ChatActionsProps> = ({
 		</div>
 	);
 };
-
