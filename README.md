@@ -1,194 +1,155 @@
 # Contenta Assistant Widget
 
-A React component library for integrating AI-powered chat widgets into your web applications. Built with TypeScript, Tailwind CSS, and modern React patterns.
+A lightweight, headless React component library for building AI-powered chat interfaces. No CSS included—style it your way.
 
 ## Features
 
-- 🤖 AI-powered chat interface
-- 📱 Responsive design with mobile support
-- 🎨 Customizable styling with Tailwind CSS
-- 🔧 TypeScript support for full type safety
-- 📦 Easy installation and integration
-- 🚀 Lightweight and performant
-- 🌙 Dark/light theme support
+- 🎯 **Headless components** - Bring your own styles
+- 🔄 **Streaming support** - Real-time AI responses via AsyncIterables
+- ⚡ **TypeScript first** - Full type safety out of the box
+- 📦 **Tiny bundle** - Zero styling overhead
+- 🎨 **Fully customizable** - Complete control over appearance
+- 🪝 **React 18+** - Built for modern React
 
 ## Installation
 
-```bash
-npm install contenta-assistant-widget
-```
+Using Bun (recommended)
 
-or
+bun add @contentagen/assistant-widget
+Using npm
 
-```bash
-yarn add contenta-assistant-widget
-```
+npm install @contentagen/assistant-widget
+Using pnpm
 
-or
+pnpm add @contentagen/assistant-widget
+Using yarn
 
-```bash
-pnpm add contenta-assistant-widget
-```
+yarn add @contentagen/assistant-widget
 
-## Setup
 
-### 1. Get Contenta API Credentials
-
-1. Sign up at [Contenta.ai](https://contenta.ai)
-2. Create a new agent
-3. Copy your API key and agent ID
-
-### 2. Environment Variables
-
-Create a `.env` file in your project root:
-
-```env
-VITE_CONTENTAGEN_API_KEY=your_api_key_here
-VITE_CONTENTAGEN_AGENT_ID=your_agent_id_here
-```
-
-Or copy the provided example:
-
-```bash
-cp .env.example .env
-```
-
-## Usage
+## Quick Start
 
 ### Basic Chat Component
 
-```tsx
-import { ContentaChat } from 'contenta-assistant-widget';
+import { ContentaChat } from '@contentagen/assistant-widget';
 
 function App() {
-  return (
-    <ContentaChat
-      apiKey={import.meta.env.VITE_CONTENTAGEN_API_KEY}
-      agentId={import.meta.env.VITE_CONTENTAGEN_AGENT_ID}
-    />
-  );
+const handleSendMessage = async function* (message: string, agentId: string) {
+// Your streaming API implementation
+const response = await fetch(https://api.yourservice.com/chat/${agentId}, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ message })
+});
+
+text
+const reader = response.body?.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  yield decoder.decode(value);
 }
-```
+
+};
+
+return (
+<ContentaChat agentId="your-agent-id" sendMessage={handleSendMessage} placeholder="Ask me anything..." autoFocus={true} showTimestamps={true} className="h-screen max-w-2xl mx-auto" />
+);
+}
+
 
 ### Widget with Popover
 
-```tsx
-import { ContentaWidget } from 'contenta-assistant-widget';
+import { ContentaWidget } from '@contentagen/assistant-widget';
 
 function App() {
-  return (
-    <ContentaWidget
-      apiKey={import.meta.env.VITE_CONTENTAGEN_API_KEY}
-      agentId={import.meta.env.VITE_CONTENTAGEN_AGENT_ID}
-      position="bottom-right"
-      theme="light"
-    />
-  );
+const handleSendMessage = async function* (message: string, agentId: string) {
+// Your streaming implementation
+// ...
+};
+
+return (
+<ContentaWidget agentId="your-agent-id" sendMessage={handleSendMessage} placeholder="How can I help?" maxLength={1000} />
+);
 }
-```
+
+text
 
 ## API Reference
 
-### ContentaChat Props
+### ContentaChat
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `apiKey` | `string` | Yes | Your Contenta API key |
-| `agentId` | `string` | Yes | Your Contenta agent ID |
-| `theme` | `'light' \| 'dark'` | No | Theme mode (default: `'light'`) |
-| `className` | `string` | No | Additional CSS classes |
-| `placeholder` | `string` | No | Input placeholder text |
+Full-screen chat interface component.
 
-### ContentaWidget Props
+#### Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `apiKey` | `string` | Yes | Your Contenta API key |
-| `agentId` | `string` | Yes | Your Contenta agent ID |
-| `position` | `'bottom-left' \| 'bottom-right' \| 'top-left' \| 'top-right'` | No | Widget position (default: `'bottom-right'`) |
-| `theme` | `'light' \| 'dark'` | No | Theme mode (default: `'light'`) |
-| `className` | `string` | No | Additional CSS classes |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `agentId` | `string` | ✅ | - | Your AI agent identifier |
+| `sendMessage` | `(message: string, agentId: string) => AsyncIterable<string>` | ✅ | - | Async generator function for streaming responses |
+| `placeholder` | `string` | ❌ | `"Digite sua mensagem..."` | Input placeholder text |
+| `disabled` | `boolean` | ❌ | `false` | Disable the input field |
+| `autoFocus` | `boolean` | ❌ | `false` | Auto-focus input on mount |
+| `maxLength` | `number` | ❌ | `500` | Maximum message length |
+| `showTimestamps` | `boolean` | ❌ | `false` | Show message timestamps |
+| `showAvatars` | `boolean` | ❌ | `false` | Show user/assistant avatars |
+| `allowMultiline` | `boolean` | ❌ | `true` | Allow multiline messages (Shift+Enter) |
+| `className` | `string` | ❌ | `"max-w-md"` | Additional CSS classes |
+| `errorMessage` | `string` | ❌ | `"Desculpe, ocorreu um erro..."` | Custom error message |
+
+### ContentaWidget
+
+Chat widget with popover trigger button. Inherits all `ContentaChat` props.
 
 ## Styling
 
-The widget uses Tailwind CSS for styling. You can customize the appearance by:
+This library is **headless** and does not include any CSS. You have complete control over styling using:
 
-1. **Importing the default styles:**
-```tsx
-import 'contenta-assistant-widget/styles';
-```
+- Tailwind CSS classes via `className` prop
+- CSS Modules
+- Styled Components
+- Emotion
+- Plain CSS
 
-2. **Using custom CSS:**
-```css
-.contenta-widget {
-  --primary-color: #your-brand-color;
-  --background-color: #your-bg-color;
-}
-```
+The components use semantic HTML and follow accessibility best practices.
 
-## Development
+### Example with Tailwind
 
-### Prerequisites
+<ContentaChat agentId="agent-123" sendMessage={handleSendMessage} className="h-full bg-white dark:bg-gray-900 rounded-lg shadow-xl p-4" />
 
-- Node.js 18+
-- npm, yarn, or pnpm
+text
 
-### Local Development
+## TypeScript Support
 
-```bash
-# Clone the repository
-git clone https://github.com/your-username/contenta-assistant-widget.git
-cd contenta-assistant-widget
+Full TypeScript definitions are included. Import types as needed:
 
-# Install dependencies
-npm install
+import type { ContentaChatProps } from '@contentagen/assistant-widget';
 
-# Start development server
-npm run dev
+const MyComponent: React.FC<ContentaChatProps> = (props) => {
+// Your component logic
+};
 
-# Build the library
-npm run build:lib
-```
+text
 
-### Project Structure
+## Requirements
 
-```
-src/
-├── components/
-│   ├── assistant-chat.tsx      # Main chat component
-│   ├── assistant-chat-widget.tsx # Widget with popover
-│   └── ui/                     # UI components
-├── lib/
-│   └── utils.ts                # Utility functions
-└── index.ts                    # Library exports
-```
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Add tests if applicable
-5. Commit your changes: `git commit -m 'Add some feature'`
-6. Push to the branch: `git push origin feature-name`
-7. Submit a pull request
+- React 18.0.0 or higher
+- React DOM 18.0.0 or higher
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Apache-2.0
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Support
 
-- 📖 [Documentation](https://github.com/your-username/contenta-assistant-widget/wiki)
-- 🐛 [Issue Tracker](https://github.com/your-username/contenta-assistant-widget/issues)
-- 💬 [Discussions](https://github.com/your-username/contenta-assistant-widget/discussions)
+For issues and questions, please open an issue on GitHub.
 
-## Acknowledgments
+---
 
-- Built with [React](https://reactjs.org/)
-- Styled with [Tailwind CSS](https://tailwindcss.com/)
-- Powered by [Contenta AI](https://contenta.ai)
+Built with ❤️ using TypeScript, React, and Bun
