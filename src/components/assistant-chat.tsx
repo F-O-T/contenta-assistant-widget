@@ -12,6 +12,7 @@ export interface ContentaChatProps {
   showAvatars?: boolean;
   allowMultiline?: boolean;
   className?: string;
+  errorMessage?: string;
 }
 
 export const ContentaChat: React.FC<ContentaChatProps> = ({
@@ -25,6 +26,7 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
   showAvatars = false,
   allowMultiline = true,
   className = 'max-w-md',
+  errorMessage = 'Desculpe, ocorreu um erro ao processar sua mensagem.',
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -49,10 +51,10 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 
   const createErrorMessage = useCallback((): Message => ({
     id: `error-${Date.now()}`,
-    content: 'Desculpe, ocorreu um erro ao processar sua mensagem.',
+    content: errorMessage,
     sender: 'system',
     timestamp: new Date(),
-  }), []);
+  }), [errorMessage]);
 
   // Direct message update function
   const updateStreamingMessage = useCallback((content: string) => {

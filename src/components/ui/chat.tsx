@@ -1,70 +1,70 @@
-'use client';
+"use client";
 
-import { cva, type VariantProps } from 'class-variance-authority';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Icons } from '@/components/ui/icons';
-import { cn } from '@/lib/utils';
+import { cva, type VariantProps } from "class-variance-authority";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Icons } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
 
 const chatVariants = cva(
 	[
-		'relative border border-border bg-card',
-		'rounded-lg shadow-md transition-all duration-200 ease-in-out',
-		'not-prose overflow-hidden',
+		"relative border border-border bg-card",
+		"rounded-lg shadow-md transition-all duration-200 ease-in-out",
+		"not-prose overflow-hidden",
 	],
 	{
 		variants: {
 			variant: {
-				default: '',
+				default: "",
 			},
 		},
 		defaultVariants: {
-			variant: 'default',
+			variant: "default",
 		},
 	},
 );
 
 const messageVariants = cva(
 	[
-		'w-fit max-w-[80%] rounded-lg px-3 py-2 text-sm',
-		'not-prose transition-all duration-200 ease-in-out',
-		'overflow-hidden',
+		"w-fit max-w-[80%] rounded-lg px-3 py-2 text-sm",
+		"not-prose transition-all duration-200 ease-in-out",
+		"overflow-hidden",
 	],
 	{
 		variants: {
 			variant: {
-				user: 'bg-foreground/90 text-card',
-				assistant: 'bg-card-muted text-foreground',
-				system: 'mx-auto bg-card-muted text-center text-xs text-foreground/75',
+				user: "bg-foreground/90 text-card",
+				assistant: "bg-card-muted text-foreground",
+				system: "mx-auto bg-card-muted text-center text-xs text-foreground/75",
 			},
 		},
 		defaultVariants: {
-			variant: 'user',
+			variant: "user",
 		},
 	},
 );
 
 const inputVariants = cva(
 	[
-		'min-h-[40px] flex-1 resize-none rounded-lg border px-3 py-2 text-sm transition-all duration-200 ease-in-out',
-		'focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-none',
-		'disabled:cursor-not-allowed disabled:opacity-50',
-		'not-prose placeholder:text-foreground/45',
-		'focus-visible:ring-offset-ring-offset/50',
+		"min-h-[40px] flex-1 resize-none rounded-lg border px-3 py-2 text-sm transition-all duration-200 ease-in-out",
+		"focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-none",
+		"disabled:cursor-not-allowed disabled:opacity-50",
+		"not-prose placeholder:text-foreground/45",
+		"focus-visible:ring-offset-ring-offset/50",
 	],
 	{
 		variants: {
 			variant: {
 				default: [
-					'border-border/60',
-					'bg-card',
-					'text-foreground',
-					'focus-visible:border-border',
-					'focus-visible:ring-ring/50',
+					"border-border/60",
+					"bg-card",
+					"text-foreground",
+					"focus-visible:border-border",
+					"focus-visible:ring-ring/50",
 				],
 			},
 		},
 		defaultVariants: {
-			variant: 'default',
+			variant: "default",
 		},
 	},
 );
@@ -72,7 +72,7 @@ const inputVariants = cva(
 export interface Message {
 	id: string;
 	content: string;
-	sender: 'user' | 'assistant' | 'system';
+	sender: "user" | "assistant" | "system";
 	timestamp: Date;
 	avatar?: string;
 	name?: string;
@@ -86,7 +86,7 @@ export interface TypingUser {
 
 export interface ChatProps
 	extends React.HTMLAttributes<HTMLDivElement>,
-		VariantProps<typeof chatVariants> {
+	VariantProps<typeof chatVariants> {
 	messages?: Message[];
 	onSendMessage?: (message: string) => void;
 	placeholder?: string;
@@ -141,18 +141,18 @@ export interface ChatActionsProps extends React.HTMLAttributes<HTMLDivElement> {
 export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 	typingUsers,
 	showAvatars = false,
-	className = '',
+	className = "",
 	...props
 }) => {
 	if (!typingUsers || typingUsers.length === 0) return null;
 
 	const getTypingText = () => {
 		if (typingUsers.length === 1) {
-			return `${typingUsers[0].name || 'Someone'} is typing`;
+			return `${typingUsers[0].name || "Someone"} is typing`;
 		} else if (typingUsers.length === 2) {
-			return `${typingUsers[0].name || 'Someone'} and ${typingUsers[1].name || 'someone else'} are typing`;
+			return `${typingUsers[0].name || "Someone"} and ${typingUsers[1].name || "someone else"} are typing`;
 		} else {
-			return `${typingUsers[0].name || 'Someone'} and ${typingUsers.length - 1} others are typing`;
+			return `${typingUsers[0].name || "Someone"} and ${typingUsers.length - 1} others are typing`;
 		}
 	};
 
@@ -160,7 +160,7 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 		<div
 			role="status"
 			aria-label="Typing indicator"
-			className={cn('not-prose flex items-end gap-2', className)}
+			className={cn("not-prose flex items-end gap-2", className)}
 			{...props}
 		>
 			{showAvatars && (
@@ -169,14 +169,14 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 						/* biome-ignore lint/performance/noImgElement: prefer native img here */
 						<img
 							src={typingUsers[0].avatar}
-							alt={typingUsers[0].name || 'typing'}
+							alt={typingUsers[0].name || "typing"}
 							className="h-full w-full rounded-full object-cover"
 						/>
 					) : (
 						<span>
 							{typingUsers[0].name
 								? typingUsers[0].name.charAt(0).toUpperCase()
-								: '?'}
+								: "?"}
 						</span>
 					)}
 				</div>
@@ -203,7 +203,7 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 export const Chat: React.FC<ChatProps> = ({
 	messages = [],
 	onSendMessage,
-	placeholder = 'Type a message...',
+	placeholder = "Type a message...",
 	disabled = false,
 	autoFocus = false,
 	maxLength = 500,
@@ -211,8 +211,8 @@ export const Chat: React.FC<ChatProps> = ({
 	showAvatars = false,
 	allowMultiline = true,
 	typingUsers = [],
-	variant = 'default',
-	className = '',
+	variant = "default",
+	className = "",
 	...props
 }) => {
 	return (
@@ -245,7 +245,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 	showTimestamps = false,
 	showAvatars = false,
 	typingUsers = [],
-	className = '',
+	className = "",
 	...props
 }) => {
 	const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -261,7 +261,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
 			container.scrollTo({
 				top: maxScrollTop > 0 ? maxScrollTop : 0,
-				behavior: 'smooth',
+				behavior: "smooth",
 			});
 		}
 	}, [messages.length, typingUsers.length]);
@@ -274,7 +274,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 			aria-relevant="additions text"
 			aria-label="Chat messages"
 			className={cn(
-				'not-prose flex-1 space-y-3 overflow-y-auto p-4',
+				"not-prose flex-1 space-y-3 overflow-y-auto p-4",
 				className,
 			)}
 			{...props}
@@ -297,19 +297,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 	message,
 	showTimestamp = false,
 	showAvatar = false,
-	className = '',
+	className = "",
 	...props
 }) => {
-	const isUser = message.sender === 'user';
-	const isSystem = message.sender === 'system';
+	const isUser = message.sender === "user";
+	const isSystem = message.sender === "system";
 
 	return (
 		<div
-			role={isSystem ? 'status' : 'listitem'}
+			role={isSystem ? "status" : "listitem"}
 			className={cn(
-				'not-prose flex items-end gap-2',
-				isUser ? 'flex-row-reverse' : 'flex-row',
-				isSystem ? 'justify-center' : '',
+				"not-prose flex items-end gap-2",
+				isUser ? "flex-row-reverse" : "flex-row",
+				isSystem ? "justify-center" : "",
 				className,
 			)}
 			{...props}
@@ -335,27 +335,27 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
 			<div
 				className={cn(
-					'flex w-full flex-col gap-1',
-					isUser ? 'items-end' : 'items-start',
-					isSystem ? 'items-center' : '',
+					"flex w-full flex-col gap-1",
+					isUser ? "items-end" : "items-start",
+					isSystem ? "items-center" : "",
 				)}
 			>
 				<div className={cn(messageVariants({ variant: message.sender }))}>
-					<div className={cn('flex w-full flex-col gap-1')}>
+					<div className={cn("flex w-full flex-col gap-1")}>
 						<div className="whitespace-pre-wrap">{message.content}</div>
 						{showTimestamp && (
 							<span
 								className={cn(
-									'text-xs',
+									"text-xs",
 									isUser
-										? 'text-right text-background/50'
-										: 'text-left text-foreground/45',
-									isSystem ? 'text-center' : '',
+										? "text-right text-background/50"
+										: "text-left text-foreground/45",
+									isSystem ? "text-center" : "",
 								)}
 							>
 								{message.timestamp.toLocaleTimeString([], {
-									hour: '2-digit',
-									minute: '2-digit',
+									hour: "2-digit",
+									minute: "2-digit",
 								})}
 							</span>
 						)}
@@ -368,15 +368,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
 export const ChatInput: React.FC<ChatInputProps> = ({
 	onSendMessage,
-	placeholder = 'Type a message...',
+	placeholder = "Type a message...",
 	disabled = false,
 	autoFocus = false,
 	maxLength = 500,
 	allowMultiline = true,
-	className = '',
+	className = "",
 	...props
 }) => {
-	const [message, setMessage] = useState('');
+	const [message, setMessage] = useState("");
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	useEffect(() => {
 		if (autoFocus) {
@@ -389,9 +389,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 			e.preventDefault();
 			if (message.trim() && !disabled) {
 				onSendMessage(message.trim());
-				setMessage('');
+				setMessage("");
 				if (textareaRef.current) {
-					textareaRef.current.style.height = 'auto';
+					textareaRef.current.style.height = "auto";
 				}
 			}
 		},
@@ -400,7 +400,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if (e.key === 'Enter') {
+			if (e.key === "Enter") {
 				if (allowMultiline && e.shiftKey) {
 					return;
 				}
@@ -419,7 +419,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 			setMessage(value);
 
 			if (textareaRef.current) {
-				textareaRef.current.style.height = 'auto';
+				textareaRef.current.style.height = "auto";
 				const newHeight = Math.min(textareaRef.current.scrollHeight, 120);
 				textareaRef.current.style.height = `${newHeight}px`;
 			}
@@ -430,7 +430,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	return (
 		<div
 			className={cn(
-				'not-prose border-t border-border/60 bg-card-muted/30 p-4',
+				"not-prose border-t border-border/60 bg-card-muted/30 p-4",
 				className,
 			)}
 			{...props}
@@ -442,21 +442,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 					onChange={handleTextareaChange}
 					onKeyDown={handleKeyDown}
 					placeholder={placeholder}
-					aria-label={placeholder || 'Type a message'}
+					aria-label={placeholder || "Type a message"}
 					aria-multiline={allowMultiline}
 					disabled={disabled}
 					rows={1}
-					className={inputVariants({ variant: 'default' })}
+					className={inputVariants({ variant: "default" })}
 				/>
 				<button
 					type="submit"
 					aria-label="Send message"
 					disabled={!message.trim() || disabled}
 					className={cn(
-						'relative h-full rounded-md px-3 py-2 font-medium transition-all duration-200 ease-in-out cursor-pointer',
-						'focus-visible:border-border focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-ring-offset/50 focus-visible:outline-none',
-						'not-prose disabled:cursor-not-allowed disabled:opacity-50',
-						'bg-foreground/90 hover:bg-foreground/75 text-background shadow-sm',
+						"relative h-full rounded-md px-3 py-2 font-medium transition-all duration-200 ease-in-out cursor-pointer",
+						"focus-visible:border-border focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-ring-offset/50 focus-visible:outline-none",
+						"not-prose disabled:cursor-not-allowed disabled:opacity-50",
+						"bg-foreground/90 hover:bg-foreground/75 text-background shadow-sm",
 						'before:content-[""] before:absolute before:inset-[1px] before:rounded-[calc(theme(borderRadius.md)-1px)] before:border-[0.5px] before:border-background/35 before:pointer-events-none',
 					)}
 				>
@@ -467,8 +467,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 				</button>
 			</form>
 			{maxLength && (
-				<div className="mt-1 text-right text-xs text-foreground/45 dark:text-foreground/45">
-					{message.length}/{maxLength}
+				<div className="flex mt-1 justify-between items-center text-xs text-foreground/45 dark:text-foreground/45">
+					<span className="gap-1 flex">
+						Powered by
+						<a className="underline" href="https://contentagen.com">
+							Contenta
+						</a>
+					</span>
+					<div>
+						{message.length}/{maxLength}
+					</div>
 				</div>
 			)}
 		</div>
@@ -477,15 +485,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
 export const ChatActions: React.FC<ChatActionsProps> = ({
 	children,
-	className = '',
+	className = "",
 	...props
 }) => {
 	return (
 		<div
-			className={cn('not-prose flex items-center gap-2', className)}
+			className={cn("not-prose flex items-center gap-2", className)}
 			{...props}
 		>
 			{children}
 		</div>
 	);
 };
+
