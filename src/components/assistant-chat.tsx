@@ -4,7 +4,7 @@ import { Chat, type Message } from "@/ui/chat";
 export interface ContentaChatProps {
 	sendMessage: (
 		message: string,
-	) => Promise<{ success: boolean; response: string }>;
+	) => Promise<{ data: { success: boolean; response: string } }>;
 	placeholder?: string;
 	disabled?: boolean;
 	autoFocus?: boolean;
@@ -100,7 +100,7 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 
 	const processResponse = useCallback(
 		async (
-			responsePromise: Promise<{ success: boolean; response: string }>,
+			responsePromise: Promise<{ data: { success: boolean; response: string } }>,
 		) => {
 			console.log("processResponse: Starting to process response");
 			// Remove typing indicator when we start receiving content
@@ -118,8 +118,10 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 
 			try {
 				console.log("processResponse: Waiting for response promise");
-				const result = await responsePromise;
-				console.log("processResponse: Got result:", result);
+				const trpcResponse = await responsePromise;
+				console.log("processResponse: Got trpc response:", trpcResponse);
+				const result = trpcResponse.data;
+				console.log("processResponse: Extracted result:", result);
 				if (result.success) {
 					console.log("processResponse: Updating message with response");
 					updateStreamingMessage(result.response);
