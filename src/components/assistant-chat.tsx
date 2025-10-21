@@ -4,7 +4,7 @@ import { Chat, type Message } from "@/ui/chat";
 export interface ContentaChatProps {
 	sendMessage: (
 		message: string,
-	) => Promise<{ data: { success: boolean; response: string } }>;
+	) => Promise<{ success: boolean; response: string }>;
 	placeholder?: string;
 	disabled?: boolean;
 	autoFocus?: boolean;
@@ -100,9 +100,8 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 
 	const processResponse = useCallback(
 		async (
-			responsePromise: Promise<{ data: { success: boolean; response: string } }>,
+			responsePromise: Promise<{ success: boolean; response: string }>,
 		) => {
-			console.log("processResponse: Starting to process response");
 			// Remove typing indicator when we start receiving content
 			setTypingUsers([]);
 
@@ -117,19 +116,13 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			setMessages((prev) => [...prev, assistantMessage]);
 
 			try {
-				console.log("processResponse: Waiting for response promise");
-				const trpcResponse = await responsePromise;
-				console.log("processResponse: Got trpc response:", trpcResponse);
-				const result = trpcResponse.data;
-				console.log("processResponse: Extracted result:", result);
+				const result = await responsePromise;
 				if (result.success) {
-					console.log("processResponse: Updating message with response");
 					updateStreamingMessage(result.response);
 				} else {
 					throw new Error("Backend returned unsuccessful response");
 				}
 			} catch (error) {
-				console.error("processResponse: Error caught:", error);
 				throw error;
 			}
 		},
@@ -139,11 +132,6 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 	const handleError = useCallback(
 		(error: unknown) => {
 			console.error("Error processing message:", error);
-			console.error("Error details:", {
-				name: error instanceof Error ? error.name : "Unknown",
-				message: error instanceof Error ? error.message : String(error),
-				stack: error instanceof Error ? error.stack : undefined,
-			});
 			const errorMessage = createErrorMessage();
 			setMessages((prev) => [...prev, errorMessage]);
 		},
