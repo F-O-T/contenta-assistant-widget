@@ -2,7 +2,9 @@ import { useCallback, useRef, useState, useMemo } from "react";
 import { Chat, type Message } from "@/ui/chat";
 
 export interface ContentaChatProps {
-	sendMessage: (message: string) => Promise<{ success: boolean; response: string }>;
+	sendMessage: (
+		message: string,
+	) => Promise<{ success: boolean; response: string }>;
 	placeholder?: string;
 	disabled?: boolean;
 	autoFocus?: boolean;
@@ -97,11 +99,17 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 	}, []);
 
 	const processResponse = useCallback(
-		async (responsePromise: Promise<{ success: boolean; response: string }>) => {
+		async (
+			responsePromise: Promise<{ success: boolean; response: string }>,
+		) => {
+			console.log("processResponse: Starting to process response");
 			// Remove typing indicator when we start receiving content
 			setTypingUsers([]);
 
-			if (!streamingMessageIdRef.current) return;
+			// Ensure we have a streaming message ID
+			if (!streamingMessageIdRef.current) {
+				streamingMessageIdRef.current = `assistant-${Date.now()}`;
+			}
 
 			const assistantMessage = createAssistantMessage(
 				streamingMessageIdRef.current,
@@ -109,13 +117,17 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			setMessages((prev) => [...prev, assistantMessage]);
 
 			try {
+				console.log("processResponse: Waiting for response promise");
 				const result = await responsePromise;
+				console.log("processResponse: Got result:", result);
 				if (result.success) {
+					console.log("processResponse: Updating message with response");
 					updateStreamingMessage(result.response);
 				} else {
 					throw new Error("Backend returned unsuccessful response");
 				}
 			} catch (error) {
+				console.error("processResponse: Error caught:", error);
 				throw error;
 			}
 		},
@@ -124,7 +136,12 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 
 	const handleError = useCallback(
 		(error: unknown) => {
-			console.error("Error streaming message:", error);
+			console.error("Error processing message:", error);
+			console.error("Error details:", {
+				name: error instanceof Error ? error.name : "Unknown",
+				message: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
 			const errorMessage = createErrorMessage();
 			setMessages((prev) => [...prev, errorMessage]);
 		},
