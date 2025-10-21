@@ -2,8 +2,7 @@ import { useCallback, useRef, useState, useMemo } from "react";
 import { Chat, type Message } from "@/ui/chat";
 
 export interface ContentaChatProps {
-	agentId: string;
-	sendMessage: (message: string, agentId: string) => AsyncIterable<string>;
+	sendMessage: (message: string) => Promise<{ success: boolean; response: string }>;
 	placeholder?: string;
 	disabled?: boolean;
 	autoFocus?: boolean;
@@ -16,7 +15,6 @@ export interface ContentaChatProps {
 }
 
 export const ContentaChat: React.FC<ContentaChatProps> = ({
-	agentId,
 	sendMessage,
 	placeholder = "Digite sua mensagem...",
 	disabled = false,
@@ -98,8 +96,8 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 		streamingMessageIdRef.current = null;
 	}, []);
 
-	const processStream = useCallback(
-		async (stream: AsyncIterable<string>) => {
+	const processResponse = useCallback(
+		async (responsePromise: Promise<{ success: boolean; response: string }>) => {
 			// Remove typing indicator when we start receiving content
 			setTypingUsers([]);
 
@@ -110,11 +108,15 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			);
 			setMessages((prev) => [...prev, assistantMessage]);
 
-			let accumulatedContent = "";
-
-			for await (const chunk of stream) {
-				accumulatedContent += chunk;
-				updateStreamingMessage(accumulatedContent);
+			try {
+				const result = await responsePromise;
+				if (result.success) {
+					updateStreamingMessage(result.response);
+				} else {
+					throw new Error("Backend returned unsuccessful response");
+				}
+			} catch (error) {
+				throw error;
 			}
 		},
 		[createAssistantMessage, updateStreamingMessage],
@@ -139,8 +141,8 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			startStreaming();
 
 			try {
-				const stream = sendMessage(message, agentId);
-				await processStream(stream);
+				const response = sendMessage(message);
+				await processResponse(response);
 			} catch (error) {
 				handleError(error);
 			} finally {
@@ -148,12 +150,11 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			}
 		},
 		[
-			agentId,
 			isStreaming,
 			sendMessage,
 			createUserMessage,
 			startStreaming,
-			processStream,
+			processResponse,
 			handleError,
 			stopStreaming,
 		],
