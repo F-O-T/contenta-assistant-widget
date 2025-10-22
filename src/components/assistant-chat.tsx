@@ -1,9 +1,11 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { DEFAULT_LOCALE, getLocaleStrings, type Locale } from "@/lib/locale";
 import { Chat, type Message, type TypingUser } from "@/ui/chat";
 
 export interface ContentaChatProps {
 	sendMessage: (message: string) => Promise<string>;
+	locale?: Locale;
 	assistantName?: string;
 	welcomeMessage?: string;
 	placeholder?: string;
@@ -21,9 +23,10 @@ export interface ContentaChatProps {
 
 export const ContentaChat: React.FC<ContentaChatProps> = ({
 	sendMessage,
-	assistantName = "Assistente",
-	welcomeMessage = "How can I help you today?",
-	placeholder = "Digite sua mensagem...",
+	locale = DEFAULT_LOCALE,
+	assistantName,
+	welcomeMessage,
+	placeholder,
 	disabled = false,
 	autoFocus = false,
 	maxLength = 500,
@@ -31,22 +34,30 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 	showAvatars = false,
 	allowMultiline = true,
 	className = "max-w-md",
-	errorMessage = "Desculpe, ocorreu um erro ao processar sua mensagem.",
+	errorMessage,
 	enableTypewriter = false,
 	typewriterSpeed = 30,
 }) => {
+	// Get locale strings
+	const localeStrings = useMemo(() => getLocaleStrings(locale), [locale]);
+
+	// Use locale strings as defaults, but allow props to override
+	const finalAssistantName = assistantName ?? localeStrings.assistantName;
+	const finalWelcomeMessage = welcomeMessage ?? localeStrings.welcomeMessage;
+	const finalPlaceholder = placeholder ?? localeStrings.placeholder;
+	const finalErrorMessage = errorMessage ?? localeStrings.errorMessage;
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
 
 	// Initialize with welcome message
 	useEffect(() => {
-		setTypingUsers([{ id: "assistant", name: assistantName }]);
+		setTypingUsers([{ id: "assistant", name: finalAssistantName }]);
 
 		const timer = setTimeout(() => {
 			const welcomeMsg: Message = {
 				id: `assistant-welcome-${Date.now()}`,
-				content: welcomeMessage,
+				content: finalWelcomeMessage,
 				sender: "assistant",
 				timestamp: new Date(),
 			};
@@ -55,7 +66,7 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 		}, 2500);
 
 		return () => clearTimeout(timer);
-	}, [assistantName, welcomeMessage]);
+	}, [finalAssistantName, finalWelcomeMessage]);
 
 	// Message creation helpers
 	const createMessage = useCallback(
@@ -63,10 +74,10 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			id: `${sender}-${Date.now()}`,
 			content,
 			sender,
-			name: sender === "assistant" ? assistantName : undefined,
+			name: sender === "assistant" ? finalAssistantName : undefined,
 			timestamp: new Date(),
 		}),
-		[assistantName],
+		[finalAssistantName],
 	);
 
 	// Handle sending a message
@@ -79,7 +90,7 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 
 			// Show typing indicator
 			setIsLoading(true);
-			setTypingUsers([{ id: "assistant", name: assistantName }]);
+			setTypingUsers([{ id: "assistant", name: finalAssistantName }]);
 
 			try {
 				const response = await sendMessage(userMessage);
@@ -88,14 +99,23 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			} catch (error) {
 				console.error("Error sending message:", error);
 				// Add error message
-				setMessages((prev) => [...prev, createMessage(errorMessage, "system")]);
+				setMessages((prev) => [
+					...prev,
+					createMessage(finalErrorMessage, "system"),
+				]);
 			} finally {
 				// Always hide typing indicator
 				setIsLoading(false);
 				setTypingUsers([]);
 			}
 		},
-		[isLoading, sendMessage, assistantName, errorMessage, createMessage],
+		[
+			isLoading,
+			sendMessage,
+			finalAssistantName,
+			finalErrorMessage,
+			createMessage,
+		],
 	);
 
 	// Memoize chat props to prevent unnecessary re-renders
@@ -103,7 +123,7 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 		() => ({
 			messages,
 			onSendMessage: handleSendMessage,
-			placeholder,
+			placeholder: finalPlaceholder,
 			disabled: disabled || isLoading,
 			autoFocus,
 			maxLength,
@@ -118,7 +138,7 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 		[
 			messages,
 			handleSendMessage,
-			placeholder,
+			finalPlaceholder,
 			disabled,
 			isLoading,
 			autoFocus,
