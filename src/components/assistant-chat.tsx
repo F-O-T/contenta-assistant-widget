@@ -1,3 +1,4 @@
+"use client"
 import { useCallback, useRef, useState, useMemo } from "react";
 import { Chat, type Message } from "@/ui/chat";
 
@@ -14,6 +15,8 @@ export interface ContentaChatProps {
 	allowMultiline?: boolean;
 	className?: string;
 	errorMessage?: string;
+	enableTypewriter?: boolean;
+	typewriterSpeed?: number;
 }
 
 export const ContentaChat: React.FC<ContentaChatProps> = ({
@@ -27,6 +30,8 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 	allowMultiline = true,
 	className = "max-w-md",
 	errorMessage = "Desculpe, ocorreu um erro ao processar sua mensagem.",
+	enableTypewriter = false,
+	typewriterSpeed = 30,
 }) => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isStreaming, setIsStreaming] = useState(false);
@@ -196,6 +201,8 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			allowMultiline,
 			typingUsers,
 			className,
+			enableTypewriter,
+			typewriterSpeed,
 		}),
 		[
 			memoizedMessages,
@@ -210,6 +217,8 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			allowMultiline,
 			typingUsers,
 			className,
+			enableTypewriter,
+			typewriterSpeed,
 		],
 	);
 
