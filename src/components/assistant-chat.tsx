@@ -1,5 +1,5 @@
-"use client"
-import { useCallback, useState, useMemo, useEffect } from "react";
+"use client";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Chat, type Message, type TypingUser } from "@/ui/chat";
 
 export interface ContentaChatProps {

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
-import { Icons } from "@/ui/icons";
-import { cn } from "@/lib/utils";
 import { useTypewriter } from "@/hooks/useTypewriter";
+import { cn } from "@/lib/utils";
+import { Icons } from "@/ui/icons";
 
 const chatVariants = cva(
 	[
