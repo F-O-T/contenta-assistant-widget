@@ -1,10 +1,10 @@
-import { useCallback, useRef, useState, useMemo } from "react";
-import { Chat, type Message } from "@/ui/chat";
+import { useCallback, useState, useMemo, useEffect } from "react";
+import { Chat, type Message, type TypingUser } from "@/ui/chat";
 
 export interface ContentaChatProps {
-	sendMessage: (
-		message: string,
-	) => Promise<{ success: boolean; response: string }>;
+	sendMessage: (message: string) => Promise<string>;
+	assistantName?: string;
+	welcomeMessage?: string;
 	placeholder?: string;
 	disabled?: boolean;
 	autoFocus?: boolean;
@@ -18,165 +18,88 @@ export interface ContentaChatProps {
 
 export const ContentaChat: React.FC<ContentaChatProps> = ({
 	sendMessage,
+	assistantName = "Assistente",
+	welcomeMessage = "How can I help you today?",
 	placeholder = "Digite sua mensagem...",
 	disabled = false,
 	autoFocus = false,
 	maxLength = 500,
-	showTimestamps = false,
+	showTimestamps = true,
 	showAvatars = false,
 	allowMultiline = true,
 	className = "max-w-md",
 	errorMessage = "Desculpe, ocorreu um erro ao processar sua mensagem.",
 }) => {
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [isStreaming, setIsStreaming] = useState(false);
-	const [typingUsers, setTypingUsers] = useState<
-		{ id: string; name: string }[]
-	>([]);
-	const streamingMessageIdRef = useRef<string | null>(null);
-	const streamingContentRef = useRef<string>("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
 
-	// Message creation utilities
-	const createUserMessage = useCallback(
-		(content: string): Message => ({
-			id: `user-${Date.now()}`,
-			content,
-			sender: "user",
-			timestamp: new Date(),
-		}),
-		[],
-	);
+	// Initialize with welcome message
+	useEffect(() => {
+		setTypingUsers([{ id: "assistant", name: assistantName }]);
 
-	const createAssistantMessage = useCallback(
-		(id: string): Message => ({
-			id,
-			content: "",
-			sender: "assistant",
-			timestamp: new Date(),
-		}),
-		[],
-	);
-
-	const createErrorMessage = useCallback(
-		(): Message => ({
-			id: `error-${Date.now()}`,
-			content: errorMessage,
-			sender: "system",
-			timestamp: new Date(),
-		}),
-		[errorMessage],
-	);
-
-	// Direct message update function
-	const updateStreamingMessage = useCallback((content: string) => {
-		streamingContentRef.current = content;
-
-		if (streamingMessageIdRef.current) {
-			setMessages((prev) =>
-				prev.map((msg) =>
-					msg.id === streamingMessageIdRef.current
-						? { ...msg, content: streamingContentRef.current }
-						: msg,
-				),
-			);
-		}
-	}, []);
-
-	// Streaming state management
-	const startStreaming = useCallback(() => {
-		setIsStreaming(true);
-		setTypingUsers([{ id: "assistant", name: "Assistente" }]);
-		streamingContentRef.current = "";
-		streamingMessageIdRef.current = `assistant-${Date.now()}`;
-	}, []);
-
-	const stopStreaming = useCallback(() => {
-		setIsStreaming(false);
-		setTypingUsers([]);
-
-		streamingContentRef.current = "";
-		streamingMessageIdRef.current = null;
-	}, []);
-
-	const processResponse = useCallback(
-		async (
-			responsePromise: Promise<{ success: boolean; response: string }>,
-		) => {
-			// Remove typing indicator when we start receiving content
+		const timer = setTimeout(() => {
+			const welcomeMsg: Message = {
+				id: `assistant-welcome-${Date.now()}`,
+				content: welcomeMessage,
+				sender: "assistant",
+				timestamp: new Date(),
+			};
+			setMessages([welcomeMsg]);
 			setTypingUsers([]);
+		}, 2500);
 
-			// Ensure we have a streaming message ID
-			if (!streamingMessageIdRef.current) {
-				streamingMessageIdRef.current = `assistant-${Date.now()}`;
-			}
+		return () => clearTimeout(timer);
+	}, [assistantName, welcomeMessage]);
 
-			const assistantMessage = createAssistantMessage(
-				streamingMessageIdRef.current,
-			);
-			setMessages((prev) => [...prev, assistantMessage]);
-
-			try {
-				const result = await responsePromise;
-				if (result.success) {
-					updateStreamingMessage(result.response);
-				} else {
-					throw new Error("Backend returned unsuccessful response");
-				}
-			} catch (error) {
-				throw error;
-			}
-		},
-		[createAssistantMessage, updateStreamingMessage],
+	// Message creation helpers
+	const createMessage = useCallback(
+		(content: string, sender: "user" | "assistant" | "system"): Message => ({
+			id: `${sender}-${Date.now()}`,
+			content,
+			sender,
+			name: sender === "assistant" ? assistantName : undefined,
+			timestamp: new Date(),
+		}),
+		[assistantName],
 	);
 
-	const handleError = useCallback(
-		(error: unknown) => {
-			console.error("Error processing message:", error);
-			const errorMessage = createErrorMessage();
-			setMessages((prev) => [...prev, errorMessage]);
-		},
-		[createErrorMessage],
-	);
-
+	// Handle sending a message
 	const handleSendMessage = useCallback(
-		async (message: string) => {
-			if (!message.trim() || isStreaming) return;
+		async (userMessage: string) => {
+			if (!userMessage.trim() || isLoading) return;
 
-			const userMessage = createUserMessage(message);
-			setMessages((prev) => [...prev, userMessage]);
+			// Add user message immediately
+			setMessages((prev) => [...prev, createMessage(userMessage, "user")]);
 
-			startStreaming();
+			// Show typing indicator
+			setIsLoading(true);
+			setTypingUsers([{ id: "assistant", name: assistantName }]);
 
 			try {
-				const response = sendMessage(message);
-				await processResponse(response);
+				const response = await sendMessage(userMessage);
+
+				setMessages((prev) => [...prev, createMessage(response, "assistant")]);
 			} catch (error) {
-				handleError(error);
+				console.error("Error sending message:", error);
+				// Add error message
+				setMessages((prev) => [...prev, createMessage(errorMessage, "system")]);
 			} finally {
-				stopStreaming();
+				// Always hide typing indicator
+				setIsLoading(false);
+				setTypingUsers([]);
 			}
 		},
-		[
-			isStreaming,
-			sendMessage,
-			createUserMessage,
-			startStreaming,
-			processResponse,
-			handleError,
-			stopStreaming,
-		],
+		[isLoading, sendMessage, assistantName, errorMessage, createMessage],
 	);
-
-	// Memoize messages to prevent unnecessary re-renders
-	const memoizedMessages = useMemo(() => messages, [messages]);
 
 	// Memoize chat props to prevent unnecessary re-renders
 	const chatProps = useMemo(
 		() => ({
-			messages: memoizedMessages,
+			messages,
 			onSendMessage: handleSendMessage,
 			placeholder,
-			disabled: disabled || isStreaming,
+			disabled: disabled || isLoading,
 			autoFocus,
 			maxLength,
 			showTimestamps,
@@ -186,11 +109,11 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			className,
 		}),
 		[
-			memoizedMessages,
+			messages,
 			handleSendMessage,
 			placeholder,
 			disabled,
-			isStreaming,
+			isLoading,
 			autoFocus,
 			maxLength,
 			showTimestamps,
