@@ -1,11 +1,12 @@
-import { useCallback, useState, useMemo, useEffect } from "react";
+"use client";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DEFAULT_LOCALE, getLocaleStrings, type Locale } from "@/lib/locale";
 import { Chat, type Message, type TypingUser } from "@/ui/chat";
 
 export interface ContentaChatProps {
 	sendMessage: (message: string) => Promise<string>;
-	assistantName?: string;
-	welcomeMessage?: string;
-	placeholder?: string;
+	locale?: Locale;
+	typingText?: string;
 	disabled?: boolean;
 	autoFocus?: boolean;
 	maxLength?: number;
@@ -13,14 +14,14 @@ export interface ContentaChatProps {
 	showAvatars?: boolean;
 	allowMultiline?: boolean;
 	className?: string;
-	errorMessage?: string;
+	enableTypewriter?: boolean;
+	typewriterSpeed?: number;
 }
 
 export const ContentaChat: React.FC<ContentaChatProps> = ({
 	sendMessage,
-	assistantName = "Assistente",
-	welcomeMessage = "How can I help you today?",
-	placeholder = "Digite sua mensagem...",
+	locale = DEFAULT_LOCALE,
+	typingText,
 	disabled = false,
 	autoFocus = false,
 	maxLength = 500,
@@ -28,20 +29,25 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 	showAvatars = false,
 	allowMultiline = true,
 	className = "max-w-md",
-	errorMessage = "Desculpe, ocorreu um erro ao processar sua mensagem.",
+	enableTypewriter = true,
+	typewriterSpeed = 30,
 }) => {
+	const localeStrings = useMemo(() => getLocaleStrings(locale), [locale]);
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
 
-	// Initialize with welcome message
+	const finalTypingText = useMemo(
+		() => typingText ?? localeStrings.typingText,
+		[typingText, localeStrings],
+	);
 	useEffect(() => {
-		setTypingUsers([{ id: "assistant", name: assistantName }]);
+		setTypingUsers([{ id: "assistant", name: localeStrings.assistantName }]);
 
 		const timer = setTimeout(() => {
 			const welcomeMsg: Message = {
 				id: `assistant-welcome-${Date.now()}`,
-				content: welcomeMessage,
+				content: localeStrings.welcomeMessage,
 				sender: "assistant",
 				timestamp: new Date(),
 			};
@@ -50,31 +56,27 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 		}, 2500);
 
 		return () => clearTimeout(timer);
-	}, [assistantName, welcomeMessage]);
+	}, [localeStrings]);
 
-	// Message creation helpers
 	const createMessage = useCallback(
 		(content: string, sender: "user" | "assistant" | "system"): Message => ({
 			id: `${sender}-${Date.now()}`,
 			content,
 			sender,
-			name: sender === "assistant" ? assistantName : undefined,
+			name: sender === "assistant" ? localeStrings.assistantName : undefined,
 			timestamp: new Date(),
 		}),
-		[assistantName],
+		[localeStrings.assistantName],
 	);
 
-	// Handle sending a message
 	const handleSendMessage = useCallback(
 		async (userMessage: string) => {
 			if (!userMessage.trim() || isLoading) return;
 
-			// Add user message immediately
 			setMessages((prev) => [...prev, createMessage(userMessage, "user")]);
 
-			// Show typing indicator
 			setIsLoading(true);
-			setTypingUsers([{ id: "assistant", name: assistantName }]);
+			setTypingUsers([{ id: "assistant", name: localeStrings.assistantName }]);
 
 			try {
 				const response = await sendMessage(userMessage);
@@ -82,23 +84,23 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 				setMessages((prev) => [...prev, createMessage(response, "assistant")]);
 			} catch (error) {
 				console.error("Error sending message:", error);
-				// Add error message
-				setMessages((prev) => [...prev, createMessage(errorMessage, "system")]);
+				setMessages((prev) => [
+					...prev,
+					createMessage(localeStrings.errorMessage, "system"),
+				]);
 			} finally {
-				// Always hide typing indicator
 				setIsLoading(false);
 				setTypingUsers([]);
 			}
 		},
-		[isLoading, sendMessage, assistantName, errorMessage, createMessage],
+		[isLoading, sendMessage, localeStrings, createMessage],
 	);
 
-	// Memoize chat props to prevent unnecessary re-renders
 	const chatProps = useMemo(
 		() => ({
 			messages,
 			onSendMessage: handleSendMessage,
-			placeholder,
+			placeholder: localeStrings.placeholder,
 			disabled: disabled || isLoading,
 			autoFocus,
 			maxLength,
@@ -106,12 +108,15 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			showAvatars,
 			allowMultiline,
 			typingUsers,
+			typingText: finalTypingText,
 			className,
+			enableTypewriter,
+			typewriterSpeed,
 		}),
 		[
 			messages,
 			handleSendMessage,
-			placeholder,
+			localeStrings.placeholder,
 			disabled,
 			isLoading,
 			autoFocus,
@@ -120,7 +125,10 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 			showAvatars,
 			allowMultiline,
 			typingUsers,
+			finalTypingText,
 			className,
+			enableTypewriter,
+			typewriterSpeed,
 		],
 	);
 

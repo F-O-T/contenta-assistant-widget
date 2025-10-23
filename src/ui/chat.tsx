@@ -1,7 +1,9 @@
+"use client";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
-import { Icons } from "@/ui/icons";
+import { useTypewriter } from "@/hooks/useTypewriter";
 import { cn } from "@/lib/utils";
+import { Icons } from "@/ui/icons";
 
 const chatVariants = cva(
 	[
@@ -88,6 +90,9 @@ export interface ChatProps
 	showAvatars?: boolean;
 	allowMultiline?: boolean;
 	typingUsers?: TypingUser[];
+	typingText?: string;
+	enableTypewriter?: boolean;
+	typewriterSpeed?: number;
 }
 
 export interface ChatMessagesProps
@@ -96,17 +101,23 @@ export interface ChatMessagesProps
 	showTimestamps?: boolean;
 	showAvatars?: boolean;
 	typingUsers?: TypingUser[];
+	typingText?: string;
+	enableTypewriter?: boolean;
+	typewriterSpeed?: number;
 }
 
 export interface ChatMessageProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: Message;
 	showTimestamp?: boolean;
 	showAvatar?: boolean;
+	enableTypewriter?: boolean;
+	typewriterSpeed?: number;
 }
 
 export interface TypingIndicatorProps
 	extends React.HTMLAttributes<HTMLDivElement> {
 	typingUsers: TypingUser[];
+	typingText?: string;
 	showAvatars?: boolean;
 }
 
@@ -125,17 +136,26 @@ export interface ChatActionsProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const TypingIndicator = React.forwardRef<HTMLDivElement, TypingIndicatorProps>(
-	({ typingUsers, showAvatars = false, className, ...props }, ref) => {
+	(
+		{
+			typingUsers,
+			typingText = "is typing...",
+			showAvatars = false,
+			className,
+			...props
+		},
+		ref,
+	) => {
 		if (!typingUsers || typingUsers.length === 0) return null;
 
 		const getTypingText = () => {
 			if (typingUsers.length === 1) {
-				return `${typingUsers[0].name || "Someone"} is typing`;
+				return `${typingUsers[0].name || "Someone"} ${typingText}`;
 			}
 			if (typingUsers.length === 2) {
-				return `${typingUsers[0].name || "Someone"} and ${typingUsers[1].name || "someone else"} are typing`;
+				return `${typingUsers[0].name || "Someone"} and ${typingUsers[1].name || "someone else"} ${typingText}`;
 			}
-			return `${typingUsers[0].name || "Someone"} and ${typingUsers.length - 1} others are typing`;
+			return `${typingUsers[0].name || "Someone"} and ${typingUsers.length - 1} others ${typingText}`;
 		};
 
 		return (
@@ -196,6 +216,9 @@ const Chat = React.forwardRef<HTMLDivElement, ChatProps>(
 			showAvatars = false,
 			allowMultiline = true,
 			typingUsers = [],
+			typingText,
+			enableTypewriter = false,
+			typewriterSpeed = 30,
 			variant,
 			className,
 			...props
@@ -214,6 +237,9 @@ const Chat = React.forwardRef<HTMLDivElement, ChatProps>(
 						showTimestamps={showTimestamps}
 						showAvatars={showAvatars}
 						typingUsers={typingUsers}
+						typingText={typingText}
+						enableTypewriter={enableTypewriter}
+						typewriterSpeed={typewriterSpeed}
 						className="max-h-96 min-h-0 flex-1"
 					/>
 					{onSendMessage && (
@@ -239,6 +265,9 @@ const ChatMessages = React.forwardRef<HTMLDivElement, ChatMessagesProps>(
 		showTimestamps = false,
 		showAvatars = false,
 		typingUsers = [],
+		typingText,
+		enableTypewriter = false,
+		typewriterSpeed = 30,
 		className,
 		...props
 	}) => {
@@ -279,9 +308,15 @@ const ChatMessages = React.forwardRef<HTMLDivElement, ChatMessagesProps>(
 						message={message}
 						showTimestamp={showTimestamps}
 						showAvatar={showAvatars}
+						enableTypewriter={enableTypewriter}
+						typewriterSpeed={typewriterSpeed}
 					/>
 				))}
-				<TypingIndicator typingUsers={typingUsers} showAvatars={showAvatars} />
+				<TypingIndicator
+					typingUsers={typingUsers}
+					typingText={typingText}
+					showAvatars={showAvatars}
+				/>
 				<div ref={messagesEndRef} />
 			</div>
 		);
@@ -291,11 +326,28 @@ ChatMessages.displayName = "ChatMessages";
 
 const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
 	(
-		{ message, showTimestamp = false, showAvatar = false, className, ...props },
+		{
+			message,
+			showTimestamp = false,
+			showAvatar = false,
+			enableTypewriter = false,
+			typewriterSpeed = 30,
+			className,
+			...props
+		},
 		ref,
 	) => {
 		const isUser = message.sender === "user";
 		const isSystem = message.sender === "system";
+		const isAssistant = message.sender === "assistant";
+
+		const shouldTypewrite = enableTypewriter && isAssistant;
+		const { displayed, typing } = useTypewriter(message.content, {
+			speed: typewriterSpeed,
+			enabled: shouldTypewrite,
+		});
+
+		const displayContent = shouldTypewrite ? displayed : message.content;
 
 		return (
 			<div
@@ -336,7 +388,12 @@ const ChatMessage = React.forwardRef<HTMLDivElement, ChatMessageProps>(
 				>
 					<div className={cn(messageVariants({ variant: message.sender }))}>
 						<div className="flex w-full flex-col gap-1">
-							<div className="whitespace-pre-wrap">{message.content}</div>
+							<div className="whitespace-pre-wrap">
+								{displayContent}
+								{typing && (
+									<span className="ml-1 inline-block animate-pulse">▋</span>
+								)}
+							</div>
 							{showTimestamp && (
 								<span
 									className={cn(
