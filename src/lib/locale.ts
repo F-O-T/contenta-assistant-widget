@@ -1,4 +1,4 @@
-export type Locale = "pt-BR" | "en-US";
+export type Locale = "pt" | "en";
 
 export interface LocaleStrings {
 	assistantName: string;
@@ -8,22 +8,22 @@ export interface LocaleStrings {
 	typingText: string;
 }
 
-export const DEFAULT_LOCALE: Locale = "en-US";
+export const DEFAULT_LOCALE: Locale = "en";
 
 export const LOCALE_STRINGS: Record<Locale, LocaleStrings> = {
-	"en-US": {
+	en: {
 		assistantName: "Assistant",
 		welcomeMessage: "How can I help you today?",
 		placeholder: "Type your message...",
 		errorMessage: "Sorry, an error occurred while processing your message.",
-		typingText: "is typing...",
+		typingText: "is thinking...",
 	},
-	"pt-BR": {
+	pt: {
 		assistantName: "Assistente",
 		welcomeMessage: "Como posso ajudá-lo hoje?",
 		placeholder: "Digite sua mensagem...",
 		errorMessage: "Desculpe, ocorreu um erro ao processar sua mensagem.",
-		typingText: "está digitando...",
+		typingText: "está pensando...",
 	},
 };
 

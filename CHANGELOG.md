@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.0.15] - 2025-01-22
+
+### Changed
+- Simplified locale codes from "pt-BR"/"en-US" to "pt"/"en"
+- Updated typing text from "is typing..."/"está digitando..." to "is thinking..."/"está pensando..."
+- Enabled typewriter effect by default (enableTypewriter = true)
+- Optimized finalTypingText calculation with useMemo
+
 ## [0.0.14] - 2025-01-22
 
 ### Added

@@ -29,15 +29,18 @@ export const ContentaChat: React.FC<ContentaChatProps> = ({
 	showAvatars = false,
 	allowMultiline = true,
 	className = "max-w-md",
-	enableTypewriter = false,
+	enableTypewriter = true,
 	typewriterSpeed = 30,
 }) => {
 	const localeStrings = useMemo(() => getLocaleStrings(locale), [locale]);
-	const finalTypingText = typingText ?? localeStrings.typingText;
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
 
+	const finalTypingText = useMemo(
+		() => typingText ?? localeStrings.typingText,
+		[typingText, localeStrings],
+	);
 	useEffect(() => {
 		setTypingUsers([{ id: "assistant", name: localeStrings.assistantName }]);
 
